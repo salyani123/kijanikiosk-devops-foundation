@@ -6,3 +6,4 @@ Initial DevOps baseline established. This release includes the foundational repo
 
 Feature A update
 Feature B update
+Conflict Test  Text
