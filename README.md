@@ -7,3 +7,5 @@ Initial DevOps baseline established. This release includes the foundational repo
 Feature A update
 Feature B update
 Conflict Test  Text
+## Tuesday Milestone: week2-tuesday-ready
+This milestone marks the completion of the KijaniKiosk Git collaboration exercises. It represents a clean repository baseline, established GitFlow branching practices, and integrated peer review workflows via Pull Requests.
