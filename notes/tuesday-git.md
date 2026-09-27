@@ -7,6 +7,7 @@
 - Branching Rules
 	Experiment on new feature branches and only merge when it is safe to do so.
 	Peer code reviews -> code merges cannot be approved until enough people have confirmed that it is okay to do so.
+	Block force pushes
 - Pull Request Expectations
 	Write clear descriptions about what changed, why, and how to test it.
 	Keep PRs small and scoped
