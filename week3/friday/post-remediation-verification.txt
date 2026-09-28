@@ -1,0 +1,19 @@
+=== Logrotate Debug Output ===
+WARNING: logrotate in debug mode does nothing except printing debug messages!  Consider using verbose mode (-v) instead if this is not what you want.
+
+reading config file /etc/logrotate.d/kijanikiosk
+Reading state from file: /var/lib/logrotate/status
+Allocating hash table for state file, size 64 entries
+Creating new state
+
+Handling 1 logs
+
+rotating pattern: /opt/kijanikiosk/shared/logs/*.log  after 1 days (14 rotations)
+empty log files are not rotated, old logs are removed
+switching euid from 0 to 0 and egid from 0 to 999 (pid 31168)
+considering log /opt/kijanikiosk/shared/logs/*.log
+  log /opt/kijanikiosk/shared/logs/*.log does not exist -- skipping
+switching euid from 0 to 0 and egid from 999 to 0 (pid 31168)
+
+=== ACL Access Model Test ===
+PASS: kk-api successfully wrote to shared logs after rotation

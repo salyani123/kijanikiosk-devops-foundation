@@ -77,8 +77,7 @@ provision_directories() {
 	log "=== Phase 3: Directories and ACLs ==="
 
 	log "Creating directory structure..."
-	mkdir -p "${APP_BASE}/config" "${APP_BASE}/shared/logs" "${APP_BASE}/api" "${APP_BASE}/payments"
-
+	mkdir -p "${APP_BASE}/config" "${APP_BASE}/shared/logs" "${APP_BASE}/api" "${APP_BASE}/payments" "${APP_BASE}/health"
 	log "Fixing dirty permissions and enforcing baseline ownership..."
 	chown -R root:"$APP_GROUP" "$APP_BASE"
 	find "$APP_BASE" -type d -exec chmod 750 {} \;
@@ -105,11 +104,27 @@ Group=kijanikiosk
 ExecStart=/usr/bin/node /opt/kijanikiosk/api/app.js
 Restart=on-failure
 
-# Hardening (Challenge A resolution: poking a hole for logs)
+# Hardening (Targeting < 3.5)
 ProtectSystem=strict
 ReadWritePaths=/opt/kijanikiosk/shared/logs
 PrivateTmp=true
 NoNewPrivileges=true
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+PrivateDevices=true
+PrivateUsers=true
+ProtectHostname=true
+ProtectClock=true
+ProtectKernelLogs=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+# Extra tweaks to get under 3.5
+LockPersonality=true
+ProtectProc=invisible
+UMask=0027
 
 [Install]
 WantedBy=multi-user.target
@@ -126,7 +141,6 @@ User=kk-payments
 Group=kijanikiosk
 ExecStart=/usr/bin/node /opt/kijanikiosk/payments/app.js
 Restart=on-failure
-
 
 ProtectSystem=strict
 ReadWritePaths=/opt/kijanikiosk/shared/logs
@@ -156,9 +170,49 @@ UMask=0077
 WantedBy=multi-user.target
 EOF
 
-	log "Reloading systemd daemon..."
-	systemctl daemon-reload
-	success "Systemd units generated."
+	log "Generating kk-logs.service..."
+	cat << 'EOF' > /etc/systemd/system/kk-logs.service
+[Unit]
+Description=KijaniKiosk Logging Service
+After=network.target
+
+[Service]
+User=kk-logs
+Group=kijanikiosk
+ExecStart=/usr/bin/tail -f /opt/kijanikiosk/shared/logs/app.log
+Restart=on-failure
+
+# Hardening (Targeting < 3.5)
+ProtectSystem=strict
+ReadWritePaths=/opt/kijanikiosk/shared/logs
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+PrivateDevices=true
+PrivateUsers=true
+ProtectHostname=true
+ProtectClock=true
+ProtectKernelLogs=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+# Extra tweaks to get under 3.5
+LockPersonality=true
+ProtectProc=invisible
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    log "Reloading systemd daemon..."
+    systemctl daemon-reload
+    log "Starting and enabling services..."
+    systemctl enable --now kk-api kk-payments kk-logs || true
+    success "Systemd units generated."
 }
 
 provision_firewall() {
@@ -194,6 +248,7 @@ provision_logging() {
 	    log "Configuring logrotate (Challenge C)..."
 	    cat << 'EOF' > /etc/logrotate.d/kijanikiosk
 	/opt/kijanikiosk/shared/logs/*.log {
+	su root kijanikiosk
 	daily
 	missingok
 	rotate 14
@@ -210,7 +265,7 @@ EOF
 provision_health_checks() {
 	log "=== Phase 7: Health Checks ==="
 
-	local health_file="${APP_BASE}/api/health.json"
+	local health_file="${APP_BASE}/health/last-provision.json"
 
 	log "Generating health check JSON..."
 	cat << EOF > "$health_file"
@@ -234,15 +289,19 @@ EOF
 verify_provisioning() {
 	log "=== Phase 8: Verification ==="
 
-	# Programmatic checks to ensure the script actually worked
-	# Using dpkg -s (status) avoids the pipefail crash
 	dpkg -s nginx >/dev/null 2>&1 || error "Verification failed: Nginx not installed"
 	getent passwd kk-payments >/dev/null || error "Verification failed: kk-payments user missing"
-	ufw status | grep -q "Status: active" || error "Verification failed: UFW is inactive"
-	[ -f "${APP_BASE}/api/health.json" ] || error "Verification failed: Health file missing"
+
+	log "Verifying UFW rules..."
+	ufw status | grep -q "22/tcp.*ALLOW" && log "PASS: SSH port 22 allowed" || error "FAIL: SSH rule missing"
+	ufw status | grep -q "80/tcp.*ALLOW" && log "PASS: HTTP port 80 allowed" || error "FAIL: HTTP rule missing"
+	ufw status | grep -q "3001/tcp.*ALLOW.*127.0.0.1" && log "PASS: Internal port 3001 allowed" || error "FAIL: Health check rule missing"
+
+	[ -f "${APP_BASE}/health/last-provision.json" ] || error "Verification failed: Health file missing"
 
 	success "All verifications passed. Server is hardened and ready."
 }
+
 
 main() {
     	provision_packages
