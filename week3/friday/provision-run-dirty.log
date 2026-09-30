@@ -1,0 +1,3 @@
+[2026-09-27T22:11:00] INFO Nginx is already at the pinned version (1.18.0-6ubuntu14.21). Skipping install.
+[2026-09-27T22:11:00] INFO User kk-api exists. Enforcing strict system account settings...
+usermod: no changes
