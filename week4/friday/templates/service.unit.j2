@@ -1,0 +1,42 @@
+[Unit]
+Description=KijaniKiosk {{ service_name }} Service
+After=network.target
+{% if service_name == "kk-payments" %}
+After=kk-api.service
+Wants=kk-api.service
+{% endif %}
+
+[Service]
+Type=simple
+User={{ service_name }}
+Group={{ service_group }}
+WorkingDirectory={{ base_dir }}/{{ service_name | replace('kk-', '') }}
+ExecStart={{ base_dir }}/{{ service_name | replace('kk-', '') }}/server --port {{ service_port }}
+Restart=on-failure
+RestartSec=5
+
+# Required Hardening Directives (Targeting < 2.5 Score)
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectClock=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+SystemCallFilter=@system-service
+SystemCallArchitectures=native
+
+# Challenge D Fix: Writable environment file path
+EnvironmentFile={{ base_dir }}/config/{{ service_name }}.env
+
+[Install]
+WantedBy=multi-user.target
