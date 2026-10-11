@@ -74,7 +74,7 @@ pipeline {
     // Post block: always, success, failure, changed
     post {
         always {
-            cleanWs()
+            cleanWs notFailBuild: true
         }
         success {
             echo "Pipeline successful! Artifact published to ${NEXUS_URL}"
