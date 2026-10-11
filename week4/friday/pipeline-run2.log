@@ -1,0 +1,97 @@
+Deploying infrastructure with Terraform...
+[0m[1mdata.aws_ami.ubuntu_22_04: Reading...[0m[0m
+[0m[1maws_security_group.app: Refreshing state... [id=sg-0e7455dcc28b293a6][0m
+[0m[1mdata.aws_ami.ubuntu_22_04: Read complete after 2s [id=ami-0f2f23fa3c4a98b7f][0m
+[0m[1mmodule.app_servers["api"].aws_instance.this: Refreshing state... [id=i-0d8616b73bc718da6][0m
+[0m[1mmodule.app_servers["logs"].aws_instance.this: Refreshing state... [id=i-0e9d08fff3fa5fc7f][0m
+[0m[1mmodule.app_servers["payments"].aws_instance.this: Refreshing state... [id=i-0462d72d3131ca07d][0m
+
+[0m[1m[32mNo changes.[0m[1m Your infrastructure matches the configuration.[0m
+
+[0mTerraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+Releasing state lock. This may take a few moments...
+[0m[1m[32m
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0mapi_server_ip = "3.252.42.218"
+logs_server_ip = "52.211.157.63"
+payments_server_ip = "54.216.49.160"
+Extracting public IPs...
+Generating Ansible inventory...
+Inventory generated successfully.
+Configuring Servers with Ansible...
+
+PLAY [Configure KijaniKiosk Servers] *******************************************
+
+TASK [Gathering Facts] *********************************************************
+[WARNING]: Host 'api-staging' is using the discovered Python interpreter at '/usr/bin/python3.10', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+[WARNING]: Host 'payments-staging' is using the discovered Python interpreter at '/usr/bin/python3.10', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+[WARNING]: Host 'logs-staging' is using the discovered Python interpreter at '/usr/bin/python3.10', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [api-staging]
+ok: [payments-staging]
+ok: [logs-staging]
+
+TASK [Update apt cache and install required packages] **************************
+ok: [api-staging]
+ok: [logs-staging]
+ok: [payments-staging]
+
+TASK [Configure journald persistence] ******************************************
+ok: [api-staging]
+ok: [payments-staging]
+ok: [logs-staging]
+
+TASK [Configure UFW firewall] **************************************************
+ok: [logs-staging]
+ok: [api-staging]
+ok: [payments-staging]
+
+TASK [Create service group] ****************************************************
+ok: [api-staging]
+ok: [logs-staging]
+ok: [payments-staging]
+
+TASK [Create service user] *****************************************************
+ok: [logs-staging]
+ok: [api-staging]
+ok: [payments-staging]
+
+TASK [Create application directories] ******************************************
+ok: [api-staging] => (item=/opt/kijanikiosk/api)
+ok: [logs-staging] => (item=/opt/kijanikiosk/logs)
+ok: [payments-staging] => (item=/opt/kijanikiosk/payments)
+ok: [api-staging] => (item=/opt/kijanikiosk/config)
+ok: [logs-staging] => (item=/opt/kijanikiosk/config)
+ok: [payments-staging] => (item=/opt/kijanikiosk/config)
+ok: [api-staging] => (item=/opt/kijanikiosk/shared/logs)
+ok: [logs-staging] => (item=/opt/kijanikiosk/shared/logs)
+ok: [payments-staging] => (item=/opt/kijanikiosk/shared/logs)
+
+TASK [Deploy environment configuration] ****************************************
+ok: [api-staging]
+ok: [logs-staging]
+ok: [payments-staging]
+
+TASK [Deploy systemd service template] *****************************************
+ok: [api-staging]
+ok: [logs-staging]
+ok: [payments-staging]
+
+TASK [Deploy logrotate template] ***********************************************
+ok: [api-staging]
+ok: [logs-staging]
+ok: [payments-staging]
+
+TASK [Ensure service is enabled and started] ***********************************
+ok: [payments-staging]
+ok: [api-staging]
+ok: [logs-staging]
+
+PLAY RECAP *********************************************************************
+api-staging                : ok=11   changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+logs-staging               : ok=11   changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+payments-staging           : ok=11   changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
