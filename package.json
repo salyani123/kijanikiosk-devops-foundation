@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node index.js",
-    "lint": "echo 'Linting passed'",
+    "lint": "echo 'Fatal: Syntax error detected' && exit 1",
     "build": "echo 'Build passed'"
   },
   "repository": {
