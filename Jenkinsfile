@@ -45,7 +45,7 @@ pipeline {
 
         stage('Archive') {
             steps {
-                sh 'npm pack'
+                sh 'exit 1'
                 // Archive stage with artifacts fingerprinting
                 archiveArtifacts artifacts: '*.tgz', fingerprint: true
             }
