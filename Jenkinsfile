@@ -9,7 +9,9 @@ pipeline {
 
     environment {
         // Nexus repository URL using IP/Gateway
-        NEXUS_URL = 'http://172.18.0.1:8081/repository/kijanikiosk-npm/'
+        NEXUS_HOST = '172.18.0.99:8081'
+        NEXUS_PATH = '/repository/kijanikiosk-npm/'
+        NEXUS_URL = 'http://${NEXUS_HOST}${NEXUS_PATH}'
     }
 
     stages {
@@ -63,7 +65,7 @@ pipeline {
 
                         # Create .npmrc, publish and delete
                         echo "registry=${NEXUS_URL}" > .npmrc
-                        echo "//172.18.0.1:8081/repository/kijanikiosk-npm/:_auth=$(echo -n ${NEXUS_USER}:${NEXUS_PASS} | base64)" >> .npmrc
+                        echo "//${NEXUS_HOST}${NEXUS_PATH}:_auth=$(echo -n ${NEXUS_USER}:${NEXUS_PASS} | base64)" >> .npmrc
                         echo "always-auth=true" >> .npmrc
 
                         npm publish
