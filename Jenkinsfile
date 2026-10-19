@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         // Nexus repository URL using IP/Gateway
-        NEXUS_HOST = '172.18.0.99:8081'
+        NEXUS_HOST = '172.18.0.1:8081'
         NEXUS_PATH = '/repository/kijanikiosk-npm/'
         NEXUS_URL = 'http://${NEXUS_HOST}${NEXUS_PATH}'
     }
