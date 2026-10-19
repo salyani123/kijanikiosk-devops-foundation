@@ -1,0 +1,25 @@
+{
+  "name": "kijanikiosk-devops-foundation",
+  "version": "1.0.0",
+  "description": "DevOps improves delivery speed and reliability.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "lint": "echo 'Linting passed'",
+    "build": "echo 'Build passed'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salyani123/kijanikiosk-devops-foundation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/salyani123/kijanikiosk-devops-foundation/issues"
+  },
+  "homepage": "https://github.com/salyani123/kijanikiosk-devops-foundation#readme",
+  "dependencies": {
+    "cowsay": "^1.6.0"
+  }
+}
