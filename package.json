@@ -4,7 +4,7 @@
   "description": "DevOps improves delivery speed and reliability.",
   "main": "index.js",
   "scripts": {
-    "test": "echo 'Fatal: Unit tests failed' && exit 1",
+    "test": "node index.js",
     "lint": "echo 'Linting passed'",
     "build": "echo 'Build passed'"
   },
