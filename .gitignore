@@ -12,3 +12,6 @@
 # OS
 .DS_Storenode_modules/
 dist/
+
+# JS
+node_modules/
