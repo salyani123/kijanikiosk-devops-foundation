@@ -10,4 +10,5 @@
 *.rsa
 
 # OS
-.DS_Store
+.DS_Storenode_modules/
+dist/

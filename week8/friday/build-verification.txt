@@ -1,0 +1,126 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.production
+#1 transferring dockerfile: 1.04kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 2.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 147B done
+#3 DONE 0.0s
+
+#4 [builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#4 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.0s done
+#4 CACHED
+
+#5 [builder 2/6] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 11.39kB done
+#6 DONE 0.0s
+
+#7 [builder 3/6] COPY package*.json ./
+#7 DONE 0.1s
+
+#8 [stage-1 2/8] RUN apk add --no-cache nodejs npm
+#8 ...
+
+#9 [builder 4/6] RUN npm ci
+#9 5.155 
+#9 5.155 added 119 packages, and audited 120 packages in 5s
+#9 5.155 
+#9 5.155 33 packages are looking for funding
+#9 5.155   run `npm fund` for details
+#9 5.156 
+#9 5.156 found 0 vulnerabilities
+#9 5.157 npm notice
+#9 5.157 npm notice New major version of npm available! 10.8.2 -> 12.2.1
+#9 5.157 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+#9 5.157 npm notice To update run: npm install -g npm@12.2.1
+#9 5.157 npm notice
+#9 DONE 5.4s
+
+#10 [builder 5/6] COPY . .
+#10 DONE 2.3s
+
+#8 [stage-1 2/8] RUN apk add --no-cache nodejs npm
+#8 6.197 ( 1/13) Installing ca-certificates (20261020-r0)
+#8 6.458 ( 2/13) Installing ada-libs (3.3.0-r0)
+#8 6.767 ( 3/13) Installing brotli-libs (1.2.1-r0)
+#8 7.224 ( 4/13) Installing c-ares (1.34.9-r0)
+#8 7.453 ( 5/13) Installing icu-data-en (76.1-r1)
+#8 8.296   Executing icu-data-en-76.1-r1.post-install
+#8 8.301   * 
+#8 8.301   * If you need ICU with non-English locales and legacy charset support, install
+#8 8.301   * package icu-data-full.
+#8 8.301   * 
+#8 8.301 ( 6/13) Installing icu-libs (76.1-r1)
+#8 ...
+
+#11 [builder 6/6] RUN npm run build
+#11 0.297 
+#11 0.297 > kk-payments@1.0.0 build
+#11 0.297 > tsc
+#11 0.297 
+#11 DONE 0.8s
+
+#8 [stage-1 2/8] RUN apk add --no-cache nodejs npm
+#8 9.691 ( 7/13) Installing nghttp2-libs (1.69.0-r0)
+#8 9.884 ( 8/13) Installing simdjson (3.12.0-r0)
+#8 10.10 ( 9/13) Installing simdutf (7.5.0-r1)
+#8 10.36 (10/13) Installing sqlite-libs (3.53.4-r0)
+#8 11.01 (11/13) Installing zstd-libs (1.5.7-r2)
+#8 11.31 (12/13) Installing nodejs (24.22.1-r1)
+#8 15.88 (13/13) Installing npm (11.11.0-r0)
+#8 16.70 Executing busybox-1.37.0-r30.trigger
+#8 16.71 Executing ca-certificates-20261020-r0.trigger
+#8 16.74 OK: 80.9 MiB in 31 packages
+#8 DONE 17.0s
+
+#12 [stage-1 3/8] RUN addgroup -S kijani && adduser -S kijani -G kijani
+#12 DONE 0.2s
+
+#13 [stage-1 4/8] WORKDIR /app
+#13 DONE 0.0s
+
+#14 [stage-1 5/8] COPY package*.json ./
+#14 DONE 0.0s
+
+#15 [stage-1 6/8] RUN npm ci --omit=dev
+#15 1.705 
+#15 1.705 added 106 packages, and audited 107 packages in 1s
+#15 1.705 
+#15 1.705 33 packages are looking for funding
+#15 1.705   run `npm fund` for details
+#15 1.706 
+#15 1.706 found 0 vulnerabilities
+#15 1.706 npm notice
+#15 1.706 npm notice New major version of npm available! 10.8.2 -> 12.2.1
+#15 1.706 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+#15 1.706 npm notice To update run: npm install -g npm@12.2.1
+#15 1.706 npm notice
+#15 DONE 1.8s
+
+#16 [stage-1 7/8] COPY --from=builder /app/dist ./dist
+#16 DONE 0.1s
+
+#17 [stage-1 8/8] RUN chown -R kijani:kijani /app
+#17 DONE 0.3s
+
+#18 exporting to image
+#18 exporting layers
+#18 exporting layers 2.3s done
+#18 exporting manifest sha256:7c838b16e64e7e9588786fff0272e075692c80e4b837052b69b18f7d5b4f412b done
+#18 exporting config sha256:b3d9fe7ffab71471470f792be32b43c4851e958cd09117b843e6c66d9d7f3939 done
+#18 exporting attestation manifest sha256:5e02276faca6424bfca718de8d139c31ac89c4c70ab8f158a3a5027f1932a47b 0.0s done
+#18 exporting manifest list sha256:ecce3d34250ccc4f348a6c6f91d3ef424d8e0d0e8a63ad3401053cf935634461 done
+#18 naming to docker.io/library/kk-payments:latest done
+#18 unpacking to docker.io/library/kk-payments:latest
+#18 unpacking to docker.io/library/kk-payments:latest 2.0s done
+#18 DONE 4.3s
+IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA
+kk-payments:latest   ecce3d34250c        316MB         78.6MB        
+kijani
