@@ -1,0 +1,5 @@
+NAME                          READY   STATUS    RESTARTS   AGE
+kk-payments-95b748c5d-cgn9m   1/1     Running   0          61s
+kk-payments-95b748c5d-gnn4b   1/1     Running   0          61s
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+kk-payments   2/2     2            2           61s

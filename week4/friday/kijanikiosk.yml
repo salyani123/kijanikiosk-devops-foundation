@@ -1,0 +1,102 @@
+---
+- name: Configure KijaniKiosk Servers
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Update apt cache and install required packages
+      apt:
+        name: ['acl', 'curl'] # Add any other packages your app needs
+        update_cache: yes
+        state: present
+
+    - name: Configure journald persistence
+      file:
+        path: /var/log/journal
+        state: directory
+        owner: root
+        group: systemd-journal
+        mode: '2755'
+      notify: restart journald
+
+    - name: Configure UFW firewall
+      ufw:
+        rule: allow
+        port: "{{ service_port | string }}"
+        proto: tcp
+      notify: reload ufw
+
+    - name: Create service group
+      group:
+        name: "{{ service_group }}"
+        state: present
+
+    - name: Create service user
+      user:
+        name: "{{ service_name }}"
+        group: "{{ service_group }}"
+        system: yes
+        create_home: no
+        shell: /usr/sbin/nologin
+
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ service_name }}"
+        group: "{{ service_group }}"
+        mode: '0750'
+      loop:
+        - "{{ base_dir }}/{{ service_name | replace('kk-', '') }}"
+        - "{{ base_dir }}/config"
+        - "{{ base_dir }}/shared/logs"
+
+    - name: Deploy environment configuration
+      copy:
+        dest: "{{ base_dir }}/config/{{ service_name }}.env"
+        content: |
+          PORT={{ service_port }}
+          NODE_ENV=staging
+        owner: root
+        group: "{{ service_group }}"
+        mode: '0640'
+
+    - name: Deploy systemd service template
+      template:
+        src: templates/service.unit.j2
+        dest: /etc/systemd/system/{{ service_name }}.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart service
+
+    - name: Deploy logrotate template
+      template:
+        src: templates/logrotate.j2
+        dest: /etc/logrotate.d/{{ service_name }}
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure service is enabled and started
+      systemd:
+        name: "{{ service_name }}"
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+  handlers:
+    - name: restart service
+      systemd:
+        name: "{{ service_name }}"
+        state: restarted
+        daemon_reload: yes
+
+    - name: restart journald
+      systemd:
+        name: systemd-journald
+        state: restarted
+
+    - name: reload ufw
+      ufw:
+        state: reloaded

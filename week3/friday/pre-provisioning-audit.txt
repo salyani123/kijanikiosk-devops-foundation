@@ -1,0 +1,31 @@
+# PRE-PROVISIONING AUDIT INTERPRETATION
+# Looking at the output, the server is definitely in a messy state:
+# 1. The kk-api user exists, but it was created as a normal user (UID 1001) with a bash shell and a home directory. It needs to be a system account with nologin.
+# 2. The /opt/kijanikiosk/config directory has 777 (world-writable) permissions, which is way too open. 
+# 3. UFW is currently inactive. Any rules added previously aren't doing anything right now, but we'll need to completely reset it before turning it on so we don't lock ourselves out.
+# 4. There's a manual package hold on 'curl'. 
+# 5. None of the kk-* systemd units exist yet.
+# 6. There are no ACLs set up on the shared directories.
+
+
+=== Users and Groups ===
+kk-api:x:1001:1001::/home/kk-api:/bin/bash
+
+=== Directory Permissions ===
+total 12
+drwxr-xr-x 3 root root 4096 Sep 27 21:29 .
+drwxr-xr-x 3 root root 4096 Sep 27 21:29 ..
+drwxrwxrwx 2 root root 4096 Sep 27 21:29 config
+
+=== ACLs ===
+
+=== Firewall State ===
+Status: inactive
+
+=== Package Holds ===
+curl
+
+=== Systemd Units ===
+
+=== Logs and Disk ===
+Archived and active journals take up 16.0M in the file system.

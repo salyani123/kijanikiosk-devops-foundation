@@ -1,0 +1,10 @@
+**1. Pipeline Automation and Reliability**
+If I had to automate this entire sequence in a CI/CD pipeline, the hardest step to make reliable would be the deployment verification. Running `kubectl apply` only confirms that the YAML syntax is valid. It doesn't wait to see if the pods actually start running. The specific failure mode I am most concerned about is a "false positive" deployment, where the pipeline reports a success because the manifest was applied, but the actual Kubernetes pods are failing and stuck.
+
+**2. Technical Translation**
+*Original prose sentence:* "The final production-ready package now measures exactly 78.6 megabytes."
+*Technical version for Tendo:* "By utilizing a multi stage Docker build, we separated the builder stage from the runtime stage, completely stripping out `devDependencies` and the TypeScript compiler to reduce the final image to 78.6MB."
+*What is lost and gained:* Translating to plain language loses the technical mechanics, like the specific Dockerfile instructions used, that another engineer would need to reproduce the work. What is gained is clarity for stakeholders, allowing them to understand the direct business value without getting bogged down in container terminology.
+
+**3. Configuration Management**
+Looking at my current Deployment manifest, the specific image tag (`1.0.0-20dd430`) and the registry namespace (`salyani123`) are hardcoded. If this application used environment variables like `NODE_ENV` or database connection strings, those would be hardcoded in the YAML as well. These belong in a ConfigMap or Secret because they are environment-specific. If they stay hardcoded, the operational problem is that we cannot use the exact same deployment file across different environments (like staging and production). We would have to manually edit the YAML file every time, which easily leads to manual errors and configuration drift.

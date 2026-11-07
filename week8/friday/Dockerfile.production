@@ -1,0 +1,41 @@
+# stage 1: build
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+
+# install dependencies for building the application
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# stage 2: production
+FROM node:20-alpine
+RUN apk add --no-cache nodejs npm
+
+# create non root kijani user and group
+RUN addgroup -S kijani && adduser -S kijani -G kijani
+
+WORKDIR /app
+
+# copy package files and install only prod dependencies
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# copy compiled js code from builder stage
+COPY --from=builder /app/dist ./dist
+
+# set permissions to the kijani user
+RUN chown -R kijani:kijani /app
+
+# switch to non root kijani user
+USER kijani
+
+# healthcheck using wget with 30s start period
+HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=3 \
+    CMD ["wget", "-q0-", "http://localhost:3001/health"]
+
+# expose the application port
+EXPOSE 3001
+
+# start the application
+CMD ["node", "dist/index.js"]

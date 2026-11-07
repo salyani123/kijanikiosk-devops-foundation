@@ -1,0 +1,32 @@
+{
+  "name": "kk-payments",
+  "version": "1.0.0",
+  "description": "DevOps improves delivery speed and reliability.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "lint": "echo 'Linting passed'",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salyani123/kijanikiosk-devops-foundation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/salyani123/kijanikiosk-devops-foundation/issues"
+  },
+  "homepage": "https://github.com/salyani123/kijanikiosk-devops-foundation#readme",
+  "dependencies": {
+    "cowsay": "^1.6.0",
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}

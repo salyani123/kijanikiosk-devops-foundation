@@ -1,0 +1,3 @@
+T0 (Pod deleted): 02:18:24
+T1 (replacement Running): 02:18:54
+Total Recovery Time: 30 seconds

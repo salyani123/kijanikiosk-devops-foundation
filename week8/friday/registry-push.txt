@@ -1,0 +1,244 @@
+Computed Tag: 1.0.0-20dd430
+Target Image: salyani123/kk-payments:1.0.0-20dd430
+
+--- PUSHING TO REGISTRY ---
+The push refers to repository [docker.io/salyani123/kk-payments]
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+4feea04c1543: Waiting
+4feea04c1543: Waiting
+6a0ac1617861: Waiting
+48cea4d00d3e: Waiting
+44136fa355b3: Waiting
+44136fa355b3: Waiting
+44136fa355b3: Waiting
+44136fa355b3: Waiting
+b2cbbfe903b0: Waiting
+44136fa355b3: Mounted from sonatype/nexus3
+b2cbbfe903b0: Waiting
+b2cbbfe903b0: Waiting
+b2cbbfe903b0: Waiting
+b2cbbfe903b0: Waiting
+b2cbbfe903b0: Waiting
+48cea4d00d3e: Pushed
+fff4e2c1b189: Waiting
+fff4e2c1b189: Waiting
+9d0e4c18753b: Waiting
+fff4e2c1b189: Waiting
+9d0e4c18753b: Waiting
+fff4e2c1b189: Waiting
+9d0e4c18753b: Waiting
+fff4e2c1b189: Waiting
+9d0e4c18753b: Waiting
+fff4e2c1b189: Waiting
+9d0e4c18753b: Waiting
+9d0e4c18753b: Waiting
+9d0e4c18753b: Waiting
+fff4e2c1b189: Pushed
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Waiting
+9699a4e48e9d: Pushed
+3776acb909c6: Waiting
+3776acb909c6: Waiting
+3776acb909c6: Waiting
+3776acb909c6: Waiting
+3776acb909c6: Waiting
+3776acb909c6: Waiting
+3776acb909c6: Waiting
+3776acb909c6: Pushed
+9e6b7503d929: Waiting
+9e6b7503d929: Waiting
+9e6b7503d929: Waiting
+9e6b7503d929: Waiting
+9e6b7503d929: Waiting
+9e6b7503d929: Waiting
+ac299de29d1b: Waiting
+b2cbbfe903b0: Pushed
+ac299de29d1b: Waiting
+2e18039f39fb: Waiting
+9e6b7503d929: Pushed
+ac299de29d1b: Waiting
+2e18039f39fb: Waiting
+ac299de29d1b: Waiting
+2e18039f39fb: Waiting
+2e18039f39fb: Waiting
+ac299de29d1b: Waiting
+2e18039f39fb: Waiting
+ac299de29d1b: Waiting
+2e18039f39fb: Waiting
+2e18039f39fb: Pushed
+0b8bb2bd1cc8: Waiting
+0b8bb2bd1cc8: Waiting
+0b8bb2bd1cc8: Waiting
+0b8bb2bd1cc8: Waiting
+0b8bb2bd1cc8: Waiting
+6a0ac1617861: Pushed
+0b8bb2bd1cc8: Waiting
+ac299de29d1b: Pushed
+0b8bb2bd1cc8: Pushed
+9d0e4c18753b: Pushed
+4feea04c1543: Pushed
+1.0.0-20dd430: digest: sha256:ecce3d34250ccc4f348a6c6f91d3ef424d8e0d0e8a63ad3401053cf935634461 size: 856
+
+--- PULLING FROM REGISTRY ---
+1.0.0-20dd430: Pulling from salyani123/kk-payments
+fff4e2c1b189: Pulling fs layer
+0b8bb2bd1cc8: Pulling fs layer
+9e6b7503d929: Pulling fs layer
+3776acb909c6: Pulling fs layer
+ac299de29d1b: Pulling fs layer
+9d0e4c18753b: Pulling fs layer
+4feea04c1543: Pulling fs layer
+2e18039f39fb: Pulling fs layer
+6a0ac1617861: Pulling fs layer
+9699a4e48e9d: Pulling fs layer
+b2cbbfe903b0: Pulling fs layer
+9e6b7503d929: Already exists
+3776acb909c6: Already exists
+2e18039f39fb: Already exists
+9699a4e48e9d: Already exists
+fff4e2c1b189: Already exists
+0b8bb2bd1cc8: Already exists
+ac299de29d1b: Already exists
+9d0e4c18753b: Already exists
+4feea04c1543: Already exists
+6a0ac1617861: Already exists
+b2cbbfe903b0: Already exists
+44136fa355b3: Already exists
+6a0ac1617861: Pull complete
+fff4e2c1b189: Pull complete
+4feea04c1543: Pull complete
+b2cbbfe903b0: Pull complete
+48cea4d00d3e: Download complete
+9d0e4c18753b: Pull complete
+9e6b7503d929: Pull complete
+3776acb909c6: Pull complete
+9699a4e48e9d: Pull complete
+2e18039f39fb: Pull complete
+ac299de29d1b: Pull complete
+0b8bb2bd1cc8: Pull complete
+Digest: sha256:ecce3d34250ccc4f348a6c6f91d3ef424d8e0d0e8a63ad3401053cf935634461
+Status: Downloaded newer image for salyani123/kk-payments:1.0.0-20dd430
+docker.io/salyani123/kk-payments:1.0.0-20dd430
