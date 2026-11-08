@@ -1,8 +1,9 @@
 # Terraform
 .terraform/
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
 .terraform.tfstate.lock.info
+crash.log
 *.tfvars
 
 # Keys and Security
