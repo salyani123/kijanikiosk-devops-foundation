@@ -1,0 +1,44 @@
+---
+- name: Configure KijaniKiosk Staging Environment
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    target_namespace: kijani-staging
+    configmap_name: kk-payments-config
+    secret_name: kk-payments-secrets
+    db_host: postgres-staging.kijani.internal
+    db_password: staging-dummy-password
+    app_port: "3001"
+    node_env: staging
+    s3_bucket: kijani-payments-receipts-staging
+    s3_endpoint: "http://host.minikube.internal:4569"
+  tasks:
+    - name: Ensure Staging ConfigMap exists
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: "{{ configmap_name }}"
+            namespace: "{{ target_namespace }}"
+          data:
+            APP_PORT: "{{ app_port }}"
+            DB_HOST: "{{ db_host }}"
+            NODE_ENV: "{{ node_env }}"
+            S3_BUCKET_NAME: "{{ s3_bucket }}"
+            S3_ENDPOINT: "{{ s3_endpoint }}"
+            
+    - name: Ensure Staging Secret exists
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ secret_name }}"
+            namespace: "{{ target_namespace }}"
+          type: Opaque
+          stringData:
+            DB_PASSWORD: "{{ db_password }}"
