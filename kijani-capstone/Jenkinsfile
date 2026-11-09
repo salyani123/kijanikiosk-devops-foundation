@@ -1,0 +1,103 @@
+pipeline {
+    agent any
+
+    environment {
+        STAGING_NS = 'kijani-staging'
+        PROD_NS    = 'default'
+        APP_NAME   = 'kk-payments-infrastructure'
+    }
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Verify IaC') {
+            parallel {
+                stage('Terraform Validate') {
+                    steps {
+                        dir('kijani-capstone/terraform') {
+                            sh 'terraform init -backend=false'
+                            sh 'terraform validate'
+                        }
+                    }
+                }
+                stage('Ansible Syntax Check') {
+                    steps {
+                        dir('kijani-capstone/ansible') {
+                            sh 'ansible-playbook -i inventory/hosts.ini playbook.yml --syntax-check'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Provision Infrastructure (Staging)') {
+            steps {
+                dir('kijani-capstone/terraform') {
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
+
+        stage('Configure Environment (Staging)') {
+            steps {
+                dir('kijani-capstone/ansible') {
+                    sh 'ansible-playbook -i inventory/hosts.ini playbook.yml'
+                }
+            }
+        }
+
+        stage('Deploy to Staging') {
+            steps {
+                dir('kijani-capstone') {
+                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kijani-ingress.yaml -n ${STAGING_NS}"
+                    sh "kubectl rollout status deployment/kk-payments -n ${STAGING_NS} --timeout=120s"
+                }
+            }
+        }
+
+        stage('Smoke Test') {
+            steps {
+                sh """
+                kubectl run smoke-test-pod --rm -i --restart=Never -n ${STAGING_NS} --image=curlimages/curl -- \
+                curl -sSf http://kk-payments-service:3001/health || exit 1
+                """
+                echo "Smoke test passed successfully! Staging is healthy."
+            }
+        }
+
+        stage('Approval Gate') {
+            steps {
+                input message: "Staging deployment and smoke test passed. Approve deployment to Production?", submitter: "admin"
+            }
+        }
+
+        stage('Deploy to Production') {
+            steps {
+                dir('kijani-capstone') {
+                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kk-payments-ingress.yaml -n ${PROD_NS}"
+                    sh "kubectl rollout status deployment/kk-payments -n ${PROD_NS} --timeout=120s"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline SUCCESS: Infrastructure provisioned and ${env.APP_NAME} deployed."
+        }
+        failure {
+            echo "Pipeline FAILED: ${env.APP_NAME} build #${env.BUILD_NUMBER}. Please check Jenkins logs."
+        }
+        changed {
+            echo "Pipeline status changed to ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+        }
+        always {
+            cleanWs notFailBuild: true
+        }
+    }
+}
