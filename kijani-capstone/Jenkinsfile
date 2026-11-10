@@ -38,6 +38,7 @@ pipeline {
             steps {
                 dir('kijani-capstone/terraform') {
                     sh 'terraform init'
+                    sh 'terraform import kubernetes_namespace.staging_namespace ${STAGING_NS} || true'
                     sh 'terraform apply -auto-approve'
                 }
             }
