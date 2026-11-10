@@ -80,7 +80,7 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 dir('kijani-capstone') {
-                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kk-payments-ingress.yaml -n ${PROD_NS}"
+                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kijani-ingress.yaml -n ${PROD_NS}"
                     sh "kubectl rollout status deployment/kk-payments -n ${PROD_NS} --timeout=120s"
                 }
             }
