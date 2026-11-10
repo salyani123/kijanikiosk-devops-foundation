@@ -47,7 +47,7 @@ pipeline {
         stage('Configure Environment (Staging)') {
             steps {
                 dir('kijani-capstone/ansible') {
-                    sh 'ansible-playbook -i inventory/hosts.ini playbook.yml'
+                    sh 'ansible-playbook -i inventory/hosts.ini playbook.yml -e @vars/staging.yml'
                 }
             }
         }
@@ -55,7 +55,7 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 dir('kijani-capstone') {
-                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kijani-ingress.yaml -n ${STAGING_NS}"
+                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kijani-ingress-staging.yaml -n ${STAGING_NS}"
                     sh "kubectl rollout status deployment/kk-payments -n ${STAGING_NS} --timeout=120s"
                 }
             }
@@ -77,10 +77,18 @@ pipeline {
             }
         }
 
+        stage('Configure Environment (Production)') {
+            steps {
+                dir('kijani-capstone/ansible') {
+                    sh "ansible-playbook -i inventory/hosts.ini playbook.yml -e '@vars/production.yml'"
+                }
+            }
+        }
+
         stage('Deploy to Production') {
             steps {
                 dir('kijani-capstone') {
-                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kijani-ingress.yaml -n ${PROD_NS}"
+                    sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kijani-ingress-production.yaml -n ${PROD_NS}"
                     sh "kubectl rollout status deployment/kk-payments -n ${PROD_NS} --timeout=120s"
                 }
             }
