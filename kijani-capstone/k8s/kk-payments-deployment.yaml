@@ -21,8 +21,6 @@ spec:
       labels:
         app: kk-payments
     spec:
-      imagePullSecrets:
-        - name: kijani-registry-credentials
       securityContext:
         runAsNonRoot: true
         runAsUser: 100
