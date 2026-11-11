@@ -1,0 +1,79 @@
+service: kijani-receipts
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: ${opt:stage, 'staging'}
+  region: af-south-1
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    DEFAULT_CURRENCY: KES
+    SERVICE_NAME: ${self:service}
+    RECEIPTS_BUCKET: ${self:custom.receiptsBucket}
+    PROCESSOR_BUCKET: ${self:custom.processorBucket}
+    NOTIFIER_BUCKET: ${self:custom.notifierBucket}
+    NOTIFICATION_CHANNEL: log 
+
+functions:
+  generateReceipt:
+    handler: handlers/receipts.generate
+    events:
+      - httpApi:
+          path: /receipts
+          method: POST
+  
+  processor:
+    handler: handlers/processor.process
+    events:
+      - s3:
+          bucket: ${self:custom.processorBucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: processed-
+            - suffix: .json
+          existing: true # Tells Serverless the bucket is defined in the Resources block
+
+  notifier:
+    handler: handlers/notifier.notify
+    events:
+      - s3:
+          bucket: ${self:custom.notifierBucket}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: notify-
+            - suffix: .json
+          existing: true
+
+plugins:
+  - serverless-s3-local
+  - serverless-offline
+
+custom:
+  receiptsBucket: kk-payments-receipts-${self:provider.stage}
+  processorBucket: kk-receipts-processed-${self:provider.stage}
+  notifierBucket: kk-notifications-queue-${self:provider.stage}
+  s3:
+    host: 0.0.0.0
+    port: 4569
+    directory: /tmp/kijani-s3-local
+  serverless-offline:
+    host: 0.0.0.0
+    httpPort: 3000
+    lambdaPort: 3002
+
+resources:
+  Resources:
+    ReceiptsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.receiptsBucket}
+    ProcessorBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.processorBucket}
+    NotifierBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.notifierBucket}

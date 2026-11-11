@@ -1,0 +1,20 @@
+{
+  "name": "kijani-serverless",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1166.0",
+    "serverless-offline": "^14.8.4",
+    "serverless-s3-local": "^0.8.5"
+  },
+  "devDependencies": {
+    "serverless": "^3.40.0"
+  }
+}

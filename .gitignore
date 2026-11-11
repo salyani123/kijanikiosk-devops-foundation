@@ -16,6 +16,9 @@ dist/
 
 # JS
 node_modules/
+kijani-capstone/kijani-serverless/node_modules/
 
 # environment variables and secrets
 kijani-capstone/jenkins-docker/.env
+
+.serverless/
