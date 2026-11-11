@@ -1,0 +1,9 @@
+target_namespace: kijani-staging
+configmap_name: kk-payments-config
+secret_name: kk-payments-secrets
+db_host: postgres-staging.kijani.internal
+db_password: staging-dummy-password
+app_port: "3001"
+node_env: staging
+s3_bucket: kijani-payments-receipts-staging
+s3_endpoint: "http://host.minikube.internal:4569"

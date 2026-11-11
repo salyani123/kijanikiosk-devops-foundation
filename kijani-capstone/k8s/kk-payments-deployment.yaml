@@ -21,10 +21,9 @@ spec:
       labels:
         app: kk-payments
     spec:
-      imagePullSecrets:
-        - name: kijani-registry-credentials
       securityContext:
         runAsNonRoot: true
+        runAsUser: 100
       containers:
         - name: kk-payments
           image: salyani123/kk-payments:1.0.0-20dd430

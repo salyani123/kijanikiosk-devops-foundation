@@ -16,3 +16,6 @@ dist/
 
 # JS
 node_modules/
+
+# environment variables and secrets
+kijani-capstone/jenkins-docker/.env
