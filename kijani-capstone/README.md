@@ -1,149 +1,153 @@
-# KijaniKiosk DevOps Capstone: Automated CI/CD & Hybrid Cloud Deployment
+# KijaniKiosk DevOps Capstone
 
-## Project Overview
+## What is this?
 
-This capstone deploys the `kk-payments` Node.js service to staging and production
-namespaces on one Minikube cluster. Jenkins runs the delivery pipeline,
-Terraform manages the staging namespace, Ansible configures environment values,
-and a local Serverless Framework stack simulates receipt processing and S3
-events.
+This project deploys the `kk-payments` receipt API to staging and production
+namespaces on a local Minikube cluster, using Jenkins for delivery, Terraform
+and Ansible for environment setup, and a local Serverless/S3 simulator for
+receipt processing; it demonstrates how to validate a change in staging before
+an operator approves production deployment.
 
 ## Architecture
 
-### 1. Delivery Pipeline (Jenkins CI/CD)
+![Architecture diagram](docs/architecture.png)
 
-The Jenkins Configuration as Code creates one Pipeline job for the `main`
-branch. It loads `kijani-capstone/Jenkinsfile` and:
-
-* Validates Terraform and Ansible configuration.
-* Configures and deploys the application to `kijani-staging`.
-* Runs a smoke test against the staging `/health` endpoint.
-* Waits at a manual approval step before deploying to the `default`
-  (production) namespace.
-
-The pipeline does not build or push the application image; build and update
-the image tag in the Kubernetes deployment manifest before running it.
-
-### 2. Kubernetes Environments
-
-Staging and production run in separate namespaces on the same Minikube cluster.
-NGINX Ingress routes `staging.kijani.local/payments/...` to staging and
-`kijani.local/payments/...` to production. Terraform provisions the staging
-namespace, and Ansible creates environment-specific ConfigMaps and Secrets.
-
-### 3. Event-Driven Receipt Processing (Serverless)
-
-The `kk-payments` service forwards receipt requests to the local Serverless
-HTTP API. The `generateReceipt` handler writes receipt data to local S3
-simulator buckets. S3 object-created events invoke the processor and notifier
-handlers, which log their processing and dispatch events.
-
-### 4. Log-Based Monitoring
-
-The application writes a structured log for each completed request except
-`/health` probes. `monitoring/error_rate.py` reads recent staging pod logs and
-reports the 5xx rate for real `/receipts` requests against the Week 7 target
-of fewer than 0.1%.
-
-The staging-only `/simulate-traffic` route randomly returns HTTP 200 or 500.
-`monitoring/trigger-incident.sh` generates synthetic traffic for testing; the
-report keeps that traffic separate from real receipt requests. This is a
-two-minute log sample, not a Prometheus alert or a rolling 30-day SLO
-measurement.
-
-![KijaniKiosk deployment architecture](docs/architecture.png)
-
-## Technology Stack
-
-* **CI/CD:** Jenkins, Jenkins Configuration as Code (JCasC), Job DSL
-* **Infrastructure as Code:** Terraform, Ansible
-* **Container Orchestration:** Kubernetes (Minikube), Docker, NGINX Ingress
-* **Application:** Node.js 20, TypeScript, Express
-* **Serverless:** Serverless Framework v3, AWS SDK v3
-* **Local Simulators:** `serverless-offline`, `serverless-s3-local`
-* **Monitoring:** Structured application logs, Python report script, `kubectl`
+- **Jenkins:** A single Pipeline job checks out its configured source, reads
+  `kijani-capstone/Jenkinsfile`, deploys staging, runs a health check, and
+  pauses for approval before production.
+- **Terraform and Ansible:** Terraform provisions the staging namespace, and
+  Ansible configures per-environment application ConfigMaps and Secrets.
+- **Kubernetes and Ingress:** Two `kk-payments` replicas run in staging; the
+  production deployment uses the `default` namespace on the same Minikube
+  cluster, with NGINX Ingress routing each hostname to its service.
+- **Receipt service:** `kk-payments` forwards receipt requests to the local
+  Serverless HTTP API, whose handlers write to simulated S3 buckets and
+  process object-created events.
+- **Log monitoring:** The app writes structured request logs; a Python script
+  summarizes recent staging receipt 5xx responses, and a staging-only route
+  generates synthetic successes and failures for testing.
 
 ## Prerequisites
 
-* Docker and Docker Compose
-* Minikube and `kubectl` (with the ingress addon enabled)
-* Terraform and Ansible for manual infrastructure setup
-* Node.js 20.x and npm
-* Python 3 for the log report
-* GitHub repository access from Jenkins so it can check out the project
+Install these before setup:
 
-## Environment Setup & Configuration
+- Linux host with `sudo`, Git, Bash, `curl`, and a text editor such as `nano`.
+- Docker Engine and Docker Compose v2.
+- Minikube and `kubectl` compatible with its Kubernetes version.
+- Node.js 20.x and npm (for the local Serverless simulator).
+- Python 3 (for the log report).
+- Internet access to pull the public application image and Jenkins plugins.
 
-### 1. Jenkins Configuration as Code (JCasC)
+Jenkins runs in the provided Docker image. That image installs Terraform
+1.5.7, Ansible, Python, `kubectl`, and Java 17. Manual infrastructure setup
+outside Jenkins also requires Terraform and Ansible with the
+`kubernetes.core` collection.
 
-Jenkins configuration is in `jenkins-docker/`. From that directory, create and
-edit the environment file:
+## Setup
+
+Run these steps in order from a terminal on the Minikube host.
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/salyani123/kijanikiosk-devops-foundation.git
+   cd kijanikiosk-devops-foundation
+   ```
+
+2. Start Minikube and enable NGINX Ingress:
+
+   ```bash
+   minikube start --driver=docker
+   minikube addons enable ingress
+   ```
+
+3. Map the application hostnames to the Minikube IP:
+
+   ```bash
+   printf '%s staging.kijani.local kijani.local\n' "$(minikube ip)" \
+     | sudo tee -a /etc/hosts
+   ```
+
+4. Configure Jenkins. Copy the example environment file, edit the values, and
+   start Jenkins:
+
+   ```bash
+   cd kijani-capstone/jenkins-docker
+   cp .env.example .env
+   nano .env
+   ```
+
+   In `.env`, set `HOST_HOME` to the absolute path of your home directory, and
+   replace the example Jenkins admin ID and password with your own values. Do
+   not commit `.env`. Then run:
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+   Jenkins is available at `http://localhost:8080`. Its Compose setup expects
+   Minikube's Docker network to be named `minikube` and mounts the host
+   kubeconfig and Minikube files into the container.
+
+5. Open a second terminal at the cloned repository root and start the staging
+   Serverless simulator:
+
+   ```bash
+   cd kijani-capstone/kijani-serverless
+   npm install
+   npx serverless offline start --stage staging
+   ```
+
+   Leave this process running when exercising receipt requests. Staging is
+   configured to use the local HTTP API on port `3000` and S3 simulator on
+   port `4569`.
+
+The application image is pulled from the public image repository using the tag
+in `kijani-capstone/k8s/kk-payments-deployment.yaml`; this setup does not build
+an image.
+
+## How to run the pipeline
+
+Start the pipeline manually from Jenkins:
+
+1. Open `http://localhost:8080` and sign in with the admin credentials from
+   `.env`.
+2. Open `kijani-capstone-main` and select **Build Now**.
+3. Watch the stages:
+   - **Verify IaC:** runs Terraform validation and Ansible syntax checks.
+   - **Provision Infrastructure (Staging):** imports or creates the staging
+     namespace through Terraform.
+   - **Configure Environment (Staging):** creates the staging ConfigMap and
+     Secret with Ansible.
+   - **Deploy to Staging:** applies the Deployment, Service, and staging
+     Ingress, then waits for rollout.
+   - **Smoke Test:** calls `/health` from a temporary pod.
+   - **Approval Gate:** pauses for an administrator's approval.
+   - **Production stages:** after approval, configures and deploys to the
+     `default` namespace.
+
+The pipeline has a 15-minute overall timeout, so the approval pause is not
+indefinite.
+
+## How to verify it works
+
+### Staging deployment and health
+
+After the Jenkins staging stages finish, check the rollout and health endpoint:
 
 ```bash
-cp .env.example .env
+kubectl rollout status deployment/kk-payments -n kijani-staging
+kubectl run health-check --rm -i --restart=Never -n kijani-staging \
+  --image=curlimages/curl -- \
+  curl -sSf http://kk-payments-service:3001/health
 ```
 
-Set `HOST_HOME` to your absolute home-directory path, and use a non-default
-`JENKINS_ADMIN_ID` and `JENKINS_ADMIN_PASSWORD`. Start or rebuild Jenkins:
+Expected: rollout succeeds and `/health` returns a healthy response. The
+pipeline should then pause at the production approval gate.
 
-```bash
-docker compose up -d --build
-```
+### Receipt processing
 
-The JCasC job is named `kijani-capstone-main`; it checks out `main` and loads
-`kijani-capstone/Jenkinsfile`. For now, start builds manually from the Jenkins
-UI. Automatic triggering on pushes to `main` is not connected yet; pushes and
-merges alone will not start a build.
-
-### 2. Local DNS Mapping
-
-Enable the Minikube ingress addon, then add the Minikube IP and application
-hostnames to your host machine's hosts file:
-
-```text
-<MINIKUBE_IP> staging.kijani.local
-<MINIKUBE_IP> kijani.local
-```
-
-Get the address with:
-
-```bash
-minikube ip
-```
-
-## Running the Application
-
-### Step 1: Start the Serverless Simulator
-
-From the repository root:
-
-```bash
-cd kijani-capstone/kijani-serverless
-npm install
-npx serverless offline start --stage staging
-```
-
-Leave it running while testing receipts. The staging ConfigMap points
-`kk-payments` to `http://host.minikube.internal:3000/receipts`; the local S3
-simulator uses port `4569`.
-
-### Step 2: Run the Jenkins Pipeline
-
-1. Open Jenkins at `http://localhost:8080`.
-2. Select and run the `kijani-capstone-main` job manually.
-3. Check that the pipeline deploys to staging and passes its health smoke test.
-4. Approve the manual production stage only when you intend to deploy to the
-   `default` namespace.
-
-The pipeline uses the public image tag already specified in
-`k8s/kk-payments-deployment.yaml`; it does not build or push an image. The
-current manifest references
-`salyani123/kk-payments:1.0.0-structured-logs-20261113174805`. To use another
-public image version, update that manifest tag before starting the pipeline.
-
-### Step 3: Verify Receipt Processing
-
-Send a uniquely identified test receipt to staging:
+With the local Serverless simulator running, submit a unique test receipt:
 
 ```bash
 curl -i -X POST http://staging.kijani.local/payments/receipts \
@@ -151,48 +155,65 @@ curl -i -X POST http://staging.kijani.local/payments/receipts \
   -d '{"orderId":"TEST-RECEIPT-001","amount":100,"currency":"KES"}'
 ```
 
-When the local simulator is available, the response should succeed. Check the
-Serverless terminal for receipt generation, processing, and notification
-events. Test requests may write objects to the staging local S3 simulator.
+Expected: the request succeeds and the Serverless terminal shows receipt
+generation, processing, and notification events. Test requests may write
+objects to the staging local S3 simulator.
 
-### Step 4: Test Synthetic Traffic and Review the Receipt Error Rate
+### Synthetic error-rate test
 
-From `kijani-capstone/`, send synthetic traffic to the staging-only endpoint:
+From `kijani-capstone/`, run:
 
 ```bash
 ./monitoring/trigger-incident.sh
 ```
 
-The helper sends 50 requests to `/payments/simulate-traffic`, which randomly
-returns HTTP 200 or 500 in staging. You can change the number with
-`ERROR_TEST_REQUESTS` or override the URL with `STAGING_ERROR_URL`. Synthetic
-requests are excluded from the receipt error-rate calculation.
+Expected: 50 requests go to `/payments/simulate-traffic`; the helper reports
+the number of HTTP 200 and 500 responses. This route is intended for staging
+only, and its synthetic requests are excluded from the receipt report.
 
-To measure real receipt requests, send a batch of uniquely identified test
-receipts through the staging `/payments/receipts` endpoint, then run from
-`kijani-capstone/`:
+### Receipt error-rate report
+
+Send a batch of uniquely identified test receipts as above, then from
+`kijani-capstone/` run:
 
 ```bash
 python3 monitoring/error_rate.py
 ```
 
-The report counts non-synthetic `/receipts` HTTP 5xx responses in staging pod
-logs from the last two minutes, compares them with the Week 7 target of fewer
-than 0.1%, prints the result, and writes
-`monitoring/error-rate-summary.txt`. It reports `NO DATA` if no receipt
-requests occurred during the window. A short sample demonstrates the
-calculation but does not establish the rolling 30-day SLO.
+Expected: the report counts non-synthetic `/receipts` HTTP 5xx responses in
+staging pod logs from the last two minutes, compares the result with the Week 7
+target of fewer than 0.1%, and writes
+`monitoring/error-rate-summary.txt`. It reports `NO DATA` if there were no
+receipt requests in the time window.
 
-## Project Structure
+### Scope success criteria status
 
-```text
-.
-├── ansible/                # Environment configuration and variables
-├── docs/                   # Scope, architecture, and test plan
-├── jenkins-docker/         # Jenkins image, plugins, Compose, and JCasC
-├── k8s/                    # Kubernetes Deployment, Service, and Ingress
-├── kijani-serverless/      # Receipt handlers and local Serverless setup
-├── monitoring/             # Log report and synthetic staging test helper
-├── terraform/              # Staging namespace configuration
-└── Jenkinsfile             # CI/CD deployment pipeline
-```
+1. **Pipeline deployment:** a reviewer can manually start the Jenkins job and
+   observe the staging deployment and health check.
+2. **Approval is required after staging health check:** implemented by the
+   pipeline's approval gate.
+3. **Bad image automatically rolls back staging:** the pipeline now attempts
+   to restore the previous staging revision after a failed rollout or smoke
+   test, when a prior revision exists.
+
+## Known limitations
+
+- The monitoring report is a manual two-minute sample, not a continuous alert
+  and not the Week 7 rolling 30-day SLO calculation; logs are not retained for
+  that duration.
+- Small receipt samples have coarse error-rate resolution: one failure in 20
+  requests is 5%, far above a 0.1% target.
+- The public application image is referenced by a fixed tag in the manifest;
+  Jenkins does not build, publish, or verify that image against the source in
+  this repository.
+- Staging rollback requires an earlier successful Deployment revision; on the
+  first deployment there is no previous version to restore. Production and
+  staging share one Minikube cluster, and production currently uses the
+  `default` namespace.
+- The Serverless/S3 setup is a local simulator, not AWS production
+  infrastructure. Values in the Ansible environment files are examples and
+  must not be used as real production secrets.
+- The `/health` endpoint checks that the app responds; it does not verify the
+  receipt service dependency.
+- The current implementation does not include production-grade secret
+  management, external durable log storage, or alert notification delivery.
