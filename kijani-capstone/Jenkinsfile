@@ -5,6 +5,9 @@ pipeline {
         STAGING_NS = 'kijani-staging'
         PROD_NS    = 'default'
         APP_NAME   = 'kk-payments-infrastructure'
+        STAGING_REVISION_BEFORE = ''
+        STAGING_DEPLOYMENT_ATTEMPTED = 'false'
+        STAGING_CHECKS_PASSED = 'false'
     }
 
     options {
@@ -54,6 +57,18 @@ pipeline {
 
         stage('Deploy to Staging') {
             steps {
+                script {
+                    env.STAGING_REVISION_BEFORE = sh(
+                        script: '''
+                            kubectl get deployment kk-payments \
+                              -n "$STAGING_NS" --ignore-not-found \
+                              -o 'jsonpath={.metadata.annotations.deployment\\.kubernetes\\.io/revision}'
+                        ''',
+                        returnStdout: true
+                    ).trim()
+                    env.STAGING_DEPLOYMENT_ATTEMPTED = 'true'
+                }
+
                 dir('kijani-capstone') {
                     sh "kubectl apply -f k8s/kk-payments-deployment.yaml -f k8s/kk-payments-service.yaml -f k8s/kijani-ingress-staging.yaml -n ${STAGING_NS}"
                     sh "kubectl rollout status deployment/kk-payments -n ${STAGING_NS} --timeout=120s"
@@ -68,6 +83,9 @@ pipeline {
                 curl -sSf http://kk-payments-service:3001/health || exit 1
                 """
                 echo "Smoke test passed successfully! Staging is healthy."
+                script {
+                    env.STAGING_CHECKS_PASSED = 'true'
+                }
             }
         }
 
@@ -101,6 +119,32 @@ pipeline {
         }
         failure {
             echo "Pipeline FAILED: ${env.APP_NAME} build #${env.BUILD_NUMBER}. Please check Jenkins logs."
+            script {
+                if (env.STAGING_DEPLOYMENT_ATTEMPTED == 'true' &&
+                    env.STAGING_CHECKS_PASSED != 'true') {
+                    def currentRevision = sh(
+                        script: '''
+                            kubectl get deployment kk-payments \
+                              -n "$STAGING_NS" --ignore-not-found \
+                              -o 'jsonpath={.metadata.annotations.deployment\\.kubernetes\\.io/revision}'
+                        ''',
+                        returnStdout: true
+                    ).trim()
+
+                    if (env.STAGING_REVISION_BEFORE &&
+                        currentRevision &&
+                        currentRevision != env.STAGING_REVISION_BEFORE) {
+                        echo 'Staging deployment or smoke test failed; rolling back the new revision.'
+                        sh '''
+                            kubectl rollout undo deployment/kk-payments -n "$STAGING_NS"
+                            kubectl rollout status deployment/kk-payments \
+                              -n "$STAGING_NS" --timeout=120s
+                        '''
+                    } else {
+                        echo 'No previous staging revision is available to restore, or no new revision was created.'
+                    }
+                }
+            }
         }
         changed {
             echo "Pipeline status changed to ${currentBuild.currentResult} - ${env.JOB_NAME} #${env.BUILD_NUMBER}"

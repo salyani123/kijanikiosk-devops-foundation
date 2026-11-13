@@ -13,7 +13,7 @@ jobs:
       pipelineJob('kijani-capstone-main') {
         description('Builds and deploys the KijaniKiosk capstone from main.')
         triggers {
-          githubPush()
+          scm('H/5 * * * *')
         }
         definition {
           cpsScm {
