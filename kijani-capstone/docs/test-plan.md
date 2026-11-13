@@ -4,14 +4,48 @@ This plan describes checks for the current Minikube, Jenkins, local Serverless,
 and log-based monitoring setup. Run destructive or production deployment tests
 only when explicitly intended.
 
+## Reviewer run-through
+
+1. **Fresh setup:** From a fresh clone, follow the [capstone README](../README.md)
+   setup instructions, then continue with the checks below. Note any step that
+   needs undocumented help.
+2. **Happy path:** Open the `kijani-capstone-main` job in Jenkins and select
+   **Build Now**. Observe staging deployment and the approval gate; approve
+   production only in the local test environment. Verify health and receipt
+   handling in Tests 1 and 2.
+3. **Failure and recovery (staging only):** Stop the local Serverless process
+   with `Ctrl-C`, then repeat the receipt request in Test 2 with a new order ID.
+   Expect HTTP 502 with `Receipt service is unavailable` and an upstream error
+   in the app logs. Restart the Serverless command from Test 2, retry with a
+   fresh order ID, and confirm receipt handling recovers.
+4. **AI governance:** Read the [AI governance log](ai-governance-log.md) and
+   comment on whether its human review steps are specific and credible.
+
 ## Prerequisites
 
 - Minikube is running with ingress enabled.
 - `kubectl` is using the intended Minikube context.
-- The `kijani-staging` namespace and staging app configuration exist.
+- Terraform and Ansible are installed, and Ansible has the `kubernetes.core`
+  collection (see the capstone README prerequisites).
+- From the repository root, create the staging namespace and app configuration:
+
+  ```bash
+  cd kijani-capstone/terraform
+  terraform init
+  terraform apply
+
+  cd ../ansible
+  ansible-playbook -i inventory/hosts.ini playbook.yml -e @vars/staging.yml
+  ```
+
+- Map the staging hostname to Minikube's IP (run on the Minikube host):
+
+  ```bash
+  echo "$(minikube ip) staging.kijani.local" | sudo tee -a /etc/hosts
+  ```
+
 - The staging app is running the updated image with structured request logs
   and the staging-only `/simulate-traffic` route.
-- Host DNS maps `staging.kijani.local` to the Minikube IP.
 
 ## 1. Staging deployment and health check
 
@@ -59,13 +93,19 @@ only when explicitly intended.
      -d '{"orderId":"TEST-RECEIPT-001","amount":100,"currency":"KES"}'
    ```
 
+3. Inspect the receipts bucket in the local S3 simulator (requires AWS CLI):
+
+   ```bash
+   aws --endpoint-url=http://localhost:4569 s3 ls s3://kk-payments-receipts-staging/
+   ```
+
 **Expected result**
 
 - The app returns a successful response when the local receipt service is
   available.
 - The Serverless logs show receipt generation followed by processor and
   notifier activity.
-- Test objects are written to the staging local S3 simulator. Use unique
+- The receipts bucket listing includes the generated test object. Use unique
   order IDs when repeating the test.
 
 **Tester Feedback:** [Pass/Fail - Comments]
@@ -106,7 +146,6 @@ From `kijani-capstone/`, run:
 
 - The report counts non-synthetic `/receipts` HTTP 5xx responses from staging
   pod logs in the last two minutes.
-- It compares the observed rate with the Week 7 target of fewer than 0.1%.
 - It writes the summary to `monitoring/error-rate-summary.txt`, or reports
   `NO DATA` if there were no receipt requests in the time window.
 
@@ -124,6 +163,10 @@ From `kijani-capstone/`, run:
 
 | Test | Result | Notes |
 |---|---|---|
+| Fresh setup from README | [Pass/Fail] | |
+| Pipeline and production happy path | [Pass/Fail] | |
+| Staging failure and recovery | [Pass/Fail] | |
+| AI governance review | [Pass/Fail] | |
 | Staging deployment and health check | [Pass/Fail] | |
 | Serverless receipt flow | [Pass/Fail] | |
 | Synthetic request logging | [Pass/Fail] | |
