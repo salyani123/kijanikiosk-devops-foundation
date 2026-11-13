@@ -1,4 +1,4 @@
 output "staging_namespace" {
     description = "The provisioned staging namespace"
-    value = kubernetes_namespace.kijani_staging.metadata[0].name
+    value = kubernetes_namespace.staging_namespace.metadata[0].name
 }

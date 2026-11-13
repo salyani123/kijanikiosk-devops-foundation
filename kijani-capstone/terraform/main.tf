@@ -12,7 +12,7 @@ provider "kubernetes" {
   config_context = "minikube"
 }
 
-resource "kubernetes_namespace" "kijani_staging" {
+resource "kubernetes_namespace" "staging_namespace" {
   metadata {
     name = var.namespace_name
     labels = {
