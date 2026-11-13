@@ -7,3 +7,4 @@ app_port: "3001"
 node_env: production
 s3_bucket: kijani-payments-receipts-prod
 s3_endpoint: "http://host.minikube.internal:4569"
+receipts_api_url: "http://host.minikube.internal:3000/receipts"

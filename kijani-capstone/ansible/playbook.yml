@@ -19,6 +19,7 @@
             NODE_ENV: "{{ node_env }}"
             S3_BUCKET_NAME: "{{ s3_bucket }}"
             S3_ENDPOINT: "{{ s3_endpoint }}"
+            RECEIPTS_API_URL: "{{ receipts_api_url }}"
             
     - name: Ensure Secret exists
       kubernetes.core.k8s:
