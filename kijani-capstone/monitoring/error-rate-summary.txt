@@ -1,0 +1,6 @@
+kk-payments staging receipt error-rate summary
+Time: 2026-11-13T15:04:13.525336+00:00
+Window: last 2 minutes
+Receipt HTTP 5xx errors: 1/20 (5.00%)
+Week 7 target: fewer than 0.1% HTTP 5xx errors
+Result: ABOVE TARGET

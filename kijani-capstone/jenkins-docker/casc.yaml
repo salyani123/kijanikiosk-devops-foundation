@@ -1,0 +1,32 @@
+jenkins:
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+       - id: ${JENKINS_ADMIN_ID}
+         password: ${JENKINS_ADMIN_PASSWORD}
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+jobs:
+  - script: |
+      pipelineJob('kijani-capstone-main') {
+        description('Builds and deploys the KijaniKiosk capstone from main.')
+        triggers {
+          githubPush()
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/salyani123/kijanikiosk-devops-foundation.git')
+                }
+                branch('*/main')
+              }
+            }
+            scriptPath('kijani-capstone/Jenkinsfile')
+            lightweight()
+          }
+        }
+      }

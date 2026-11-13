@@ -1,0 +1,6 @@
+configuration-as-code:latest
+job-dsl:latest
+workflow-aggregator:latest
+git:latest
+github:latest
+ws-cleanup:latest
